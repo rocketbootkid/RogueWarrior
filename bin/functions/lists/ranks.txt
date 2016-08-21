@@ -1,0 +1,17 @@
+Trainee,0
+Student,5
+Journeyman,10
+Noted,15
+Great,20
+Illustrious,25
+Remarkable,30
+Fabulous,35
+Infamous,40
+Splendid,45
+Notorious,50
+Storied,60
+Master,70
+Guru,80
+Legendary,100
+Mythical,120
+Fabled,150
