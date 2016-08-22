@@ -8,10 +8,8 @@
 	include('functions/fight_functions.php');
 	
 	
-	$Warrior_one_id = selectRandomWarrior();
-	$Warrior_two_id = selectSimilarWarrior($Warrior_one_id);
-	
-	doFight($Warrior_one_id, $Warrior_two_id);
+	$warriors = chooseWarriors();
+	doFight($warriors);
 	
 	displayLog();
 

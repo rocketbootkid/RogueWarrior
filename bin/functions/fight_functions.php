@@ -1,6 +1,6 @@
 <?php
 
-function doFight() {
+function doFight($warriors) {
 
   $warriors = explode(",", chooseWarrior());
   $warrior_one = $warriors[0];
@@ -82,6 +82,15 @@ function chooseSuitableWarrior($warrior_one_id) {
 
   return $warrior_two;
 
+}
+
+function countWarriors() {
+	
+	$sql = "SELECT count(*) FROM roguewarrior.warrior WHERE warrior_status NOT LIKE 'Dead';";
+	
+	
+	
+	
 }
 
 function getWarriorAttribute($warrior_id, $attribute) {
