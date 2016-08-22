@@ -77,6 +77,17 @@ function doFight($warriors) {
 		
 	}
 	
+	# Declare the winner
+	if ($arrAttacker['warrior_hp'] > 0 && $arrDefender['warrior_hp'] <= 0) { # Attacker wins
+		$winner = $arrAttacker['warrior_id'];
+		$fight_log = $fight_log . "<tr><td colspan=3 align=center>After " . $round . " rounds, " . $arrAttacker['warrior_name'] . " is the victor!</tr>";
+	} elseif ($arrDefender['warrior_hp'] > 0 && $arrAttacker['warrior_hp'] <= 0) { # Defender wins
+		$winner = $arrDefender['warrior_id'];
+		$fight_log = $fight_log . "<tr><td colspan=3 align=center>After " . $round . " rounds, " . $arrDefender['warrior_name'] . " is the victor!</tr>";
+	} else {
+		
+	}
+	
 	$fight_log = $fight_log . "</table>";
 	  
 	echo $fight_log;
