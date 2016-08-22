@@ -23,13 +23,10 @@ function doFight($warriors) {
 		writeLog("doFight(): Warrior 2, " . $arrAttacker['warrior_name'] . " goes first, then " . $arrDefender['warrior_name']);
 	}
 	
-	echo $arrWarriorOneStats['warrior_hp'];
-	echo $arrWarriorTwoStats['warrior_hp'];
-	
 	$round = 0;
-	$fight_log = "<table cellpadding=3 cellspacing=3 border=1><tr><td>Round<td>Attacker<td>Defender</tr>";
-
-	while ($arrWarriorOneStats['warrior_hp'] > 0 && $arrWarriorOneStats['warrior_hp'] > 0) {
+	$fight_log = "<table cellpadding=3 cellspacing=3 border=1><tr><td>Round<td>Attacker - " . $arrAttacker['warrior_name'] . "<td>Defender - " . $arrDefender['warrior_name'] . "</tr>";
+	
+	while ($arrAttacker['warrior_hp'] > 0 && $arrDefender['warrior_hp'] > 0) {
 
 		$round++;
 		writeLog("doFight(): Round " . $round . "!");
@@ -42,17 +39,18 @@ function doFight($warriors) {
 			writeLog("doFight(): " . $arrAttacker['warrior_name'] . " hits!");
 			# If hits, how much damage
 			$damage = rand(1, $arrAttacker['warrior_str']) - floor(rand(1, $arrDefender['warrior_con'])/2);
+			if ($damage < 0) { $damage = 0; }
 			writeLog("doFight(): " . $arrAttacker['warrior_name'] . " does " . $damage . " damage to " . $arrDefender['warrior_name']);
 			
 			# Take damage away from Defender HP
 			$arrDefender['warrior_hp'] = $arrDefender['warrior_hp'] - $damage;
 			
-			$fight_log = $fight_log . "<td>" . $arrAttacker['warrior_name'] . " hits " . $arrDefender['warrior_name'] . " for " . $damage . " points of damage!";
+			$fight_log = $fight_log . "<td>" . $arrAttacker['warrior_name'] . " hits " . $arrDefender['warrior_name'] . " for " . $damage . " points of damage!</br>" . $arrDefender['warrior_name'] . " has " . $arrDefender['warrior_hp'] . "HP remaining.";
 					
 		} else { # Miss
 			writeLog("doFight(): " . $arrAttacker['warrior_name'] . " misses!");
 			
-			$fight_log = $fight_log . "<td>" . $arrAttacker['warrior_name'] . " misses " . $arrDefender['warrior_name'] . "!";
+			$fight_log = $fight_log . "<td>" . $arrAttacker['warrior_name'] . " misses " . $arrDefender['warrior_name'] . "!</br>" . $arrDefender['warrior_name'] . " has " . $arrDefender['warrior_hp'] . "HP remaining.";
 			
 		}
 		
@@ -68,18 +66,20 @@ function doFight($warriors) {
 			# Take damage away from Defender
 			$arrAttacker['warrior_hp'] = $arrAttacker['warrior_hp'] - $damage;
 			
-			$fight_log = $fight_log . "<td>" . $arrDefender['warrior_name'] . " hits " . $arrAttacker['warrior_name'] . " for " . $damage . " points of damage!</tr>";
+			$fight_log = $fight_log . "<td>" . $arrDefender['warrior_name'] . " hits " . $arrAttacker['warrior_name'] . " for " . $damage . " points of damage!</br>" . $arrAttacker['warrior_name'] . " has " . $arrAttacker['warrior_hp'] . "HP remaining.</tr>";
 			
 		} else {
 			writeLog("doFight(): " . $arrDefender['warrior_name'] . " misses!");
 			
-			$fight_log = $fight_log . "<td>" . $arrDefender['warrior_name'] . " misses " . $arrAttacker['warrior_name'] . "!</tr>";
+			$fight_log = $fight_log . "<td>" . $arrDefender['warrior_name'] . " misses " . $arrAttacker['warrior_name'] . "!</br>" . $arrAttacker['warrior_name'] . " has " . $arrAttacker['warrior_hp'] . "HP remaining.</tr>";
 			
 		}
-
+		
 	}
 	
 	$fight_log = $fight_log . "</table>";
+	  
+	echo $fight_log;
 	  
 	# Write fight log to database
 	# fight_id
