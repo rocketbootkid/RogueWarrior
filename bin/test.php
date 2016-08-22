@@ -8,9 +8,9 @@
 	include('functions/fight_functions.php');
 	
 	
-	$warriors = chooseWarriors();
-	doFight($warriors);
-	
+	#$warriors = chooseWarriors();
+	#doFight($warriors);
+		var_dump(buildRankArray());	
 	displayLog();
 
 

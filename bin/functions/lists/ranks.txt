@@ -12,6 +12,7 @@ Notorious,50
 Storied,60
 Master,70
 Guru,80
+Heroic,90
 Legendary,100
 Mythical,120
 Fabled,150

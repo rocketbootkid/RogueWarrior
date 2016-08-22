@@ -44,53 +44,46 @@ function doFight($warriors) {
 }
 
 function chooseWarriors() {
-  # Choose one warrior at random
-  $warrior_one = chooseRandomWarrior();
+	# Choose one warrior at random
+	$warrior_one = chooseRandomWarrior();
 
-  # Choose second warrior at same rank, or one rank higher or lower.
-  $warrior_two = chooseSuitableWarrior($warrior_one);
-  
-  return $warrior_one  . "," . $warrior_two;
+	# Choose second warrior at same rank, or one rank higher or lower.
+	$warrior_two = chooseSuitableWarrior($warrior_one);
+
+	return $warrior_one  . "," . $warrior_two;
 
 }
 function chooseRandomWarrior() {
 
-  # Count the number of non-dead warriors in the database
-  
-  
-  # Select one warrior and extract their warrior_id
+	# Count the number of non-dead warriors in the database
+	$count = countWarriors();
+	  
+	# Select one warrior and extract their warrior_id
+	srand();
+	$randomwarrior = rand(1, $count);
 
-
-  return $randomwarrior;
-  
+	return $randomwarrior;
+	  
 }
 
 function chooseSuitableWarrior($warrior_one_id) {
 
-  # Get rank of Warrior One
-  
-  # Convert to Rank Number
-  
-  # Determine adjacent Rank Numbers, and if less than zero, set to zero
-  
-  # Convert adjacent Rank Numbers back to Ranks
-  
-  # Search for Warrior;
-  #   That's not dead
-  #   That is one of the three ranks
-  #   That is not Warrior One
+	# Get rank of Warrior One
+	$warrior_one_rank = getWarriorAttribute($warrior_one_id, 'warrior_rank');
 
-  return $warrior_two;
+	# Convert to Rank Number
 
-}
+	# Determine adjacent Rank Numbers, and if less than zero, set to zero
 
-function countWarriors() {
-	
-	$sql = "SELECT count(*) FROM roguewarrior.warrior WHERE warrior_status NOT LIKE 'Dead';";
-	
-	
-	
-	
+	# Convert adjacent Rank Numbers back to Ranks
+
+	# Search for Warrior;
+	#   That's not dead
+	#   That is one of the three ranks
+	#   That is not Warrior One
+
+	return $warrior_two;
+
 }
 
 function getWarriorAttribute($warrior_id, $attribute) {
@@ -101,17 +94,24 @@ function getWarriorAttribute($warrior_id, $attribute) {
 
 function getAllWarriorDetails($warrior_id) {
 
-  # Search for warrior
+	# Search for warrior
 
-  return $arrDetails;
+	return $arrDetails;
 
 }
 
 function buildRankArray() {
 
-  # Read ranks.txt into a 2D array
+	# Read ranks.txt into a 2D array
+	$file_contents = file('functions/lists/ranks.txt');
+	$rows = count($file_contents);
+	$arrRanks = array();
+	for ($r = 0; $r < $rows; $r++) {
+		$row_details = explode(",", $file_contents[$r]);
+		$arrRanks[$r] = array($row_details[0] => $row_details[1]);
+	}
 
-  return $arrRanks;
+	return $arrRanks;
 
 }
 
