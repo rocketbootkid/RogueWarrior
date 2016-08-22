@@ -9,14 +9,8 @@
 	
 	
 	#$warriors = chooseWarriors();
-	#doFight($warriors);
-		var_dump(buildRankArray());	
+	#Fight($warriors);
+		doFight(chooseWarriors());	
 	displayLog();
-
-
-
-
-
-
 
 ?>

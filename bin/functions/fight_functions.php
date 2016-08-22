@@ -4,7 +4,7 @@ function doFight($warriors) {
 
 	writeLog("doFight(): Warriors: " . $warriors);
 	
-	$warriors = explode(",", chooseWarrior());
+	$warriors = explode(",", $warriors);
 	$warrior_one = $warriors[0];
 	$warrior_two = $warriors[1];
 
@@ -13,25 +13,74 @@ function doFight($warriors) {
 	$arrWarriorTwoStats = getAllWarriorDetails($warrior_two);
 
 	# See who gets to attack first (Speed)
+	if ($arrWarriorOneStats['warrior_spd'] > $arrWarriorTwoStats['warrior_spd']) {
+		$arrAttacker = $arrWarriorOneStats;
+		$arrDefender = $arrWarriorTwoStats;
+		writeLog("doFight(): Warrior 1, " . $arrAttacker['warrior_name'] . " goes first, then " . $arrDefender['warrior_name']);
+	} else {
+		$arrAttacker = $arrWarriorTwoStats;
+		$arrDefender = $arrWarriorOneStats;
+		writeLog("doFight(): Warrior 2, " . $arrAttacker['warrior_name'] . " goes first, then " . $arrDefender['warrior_name']);
+	}
+	
+	echo $arrWarriorOneStats['warrior_hp'];
+	echo $arrWarriorTwoStats['warrior_hp'];
+	
+	$round = 0;
+	$fight_log = "<table cellpadding=3 cellspacing=3 border=1><tr><td>Round<td>Attacker<td>Defender</tr>";
 
-	# while (both players have positive HP)
+	while ($arrWarriorOneStats['warrior_hp'] > 0 && $arrWarriorOneStats['warrior_hp'] > 0) {
 
-	# First attacks / Second Defends
+		$round++;
+		writeLog("doFight(): Round " . $round . "!");
+		$fight_log = $fight_log . "<tr><td>" . $round;
 
-	  # See if Attacker Hits
-	  
-	  # If hits, how much damage
-	  
-	  # Take damage away from Defender
-	  
-	# Second Attacks / First Defends
+		# First attacks / Second Defends
+		
+		# See if Attacker Hits
+		if (rand(0, $arrAttacker['warrior_acc']) >= rand(0, $arrDefender['warrior_dex'])) {
+			writeLog("doFight(): " . $arrAttacker['warrior_name'] . " hits!");
+			# If hits, how much damage
+			$damage = rand(1, $arrAttacker['warrior_str']) - floor(rand(1, $arrDefender['warrior_con'])/2);
+			writeLog("doFight(): " . $arrAttacker['warrior_name'] . " does " . $damage . " damage to " . $arrDefender['warrior_name']);
+			
+			# Take damage away from Defender HP
+			$arrDefender['warrior_hp'] = $arrDefender['warrior_hp'] - $damage;
+			
+			$fight_log = $fight_log . "<td>" . $arrAttacker['warrior_name'] . " hits " . $arrDefender['warrior_name'] . " for " . $damage . " points of damage!";
+					
+		} else { # Miss
+			writeLog("doFight(): " . $arrAttacker['warrior_name'] . " misses!");
+			
+			$fight_log = $fight_log . "<td>" . $arrAttacker['warrior_name'] . " misses " . $arrDefender['warrior_name'] . "!";
+			
+		}
+		
+		# Second Attacks / First Defends
 
-	  # See if Attacker Hits
-	  
-	  # If hits, how much damage
-	  
-	  # Take damage away from Defender
+		# See if Attacker Hits
+		if (rand(0, $arrDefender['warrior_acc']) >= rand(0, $arrAttacker['warrior_dex'])) {
+			writeLog("doFight(): " . $arrDefender['warrior_name'] . " hits!");
+			# If hits, how much damage
+			$damage = rand(1, $arrDefender['warrior_str']) - floor(rand(1, $arrAttacker['warrior_con'])/2);
+			writeLog("doFight(): " . $arrDefender['warrior_name'] . " does " . $damage . " damage to " . $arrAttacker['warrior_name']);
+			
+			# Take damage away from Defender
+			$arrAttacker['warrior_hp'] = $arrAttacker['warrior_hp'] - $damage;
+			
+			$fight_log = $fight_log . "<td>" . $arrDefender['warrior_name'] . " hits " . $arrAttacker['warrior_name'] . " for " . $damage . " points of damage!</tr>";
+			
+		} else {
+			writeLog("doFight(): " . $arrDefender['warrior_name'] . " misses!");
+			
+			$fight_log = $fight_log . "<td>" . $arrDefender['warrior_name'] . " misses " . $arrAttacker['warrior_name'] . "!</tr>";
+			
+		}
 
+	}
+	
+	$fight_log = $fight_log . "</table>";
+	  
 	# Write fight log to database
 	# fight_id
 	# winner_id
@@ -68,7 +117,7 @@ function chooseRandomWarrior() {
 	# Select one warrior and extract their warrior_id
 	srand();
 	$randomwarrior = rand(1, $count);
-	writeLog("chooseRandomWarrior(): Random Warrior: " . $randomwarrior);
+	writeLog("chooseRandomWarrior(): Warrior 1: " . $randomwarrior);
 
 	return $randomwarrior;
 	  
@@ -80,21 +129,40 @@ function chooseSuitableWarrior($warrior_one_id) {
 
 	# Get rank of Warrior One
 	$warrior_one_rank = getWarriorAttribute($warrior_one_id, 'warrior_rank');
+	writeLog("chooseSuitableWarrior(): Warrior 1 Rank: " . $warrior_one_rank);
 	
 	$arrRanks = buildRankArray();
 
 	# Convert to Rank Number
 	$warrior_one_rank_number = array_search($warrior_one_rank,array_keys($arrRanks));
+	writeLog("chooseSuitableWarrior(): Warrior 1 Rank Number: " . $warrior_one_rank_number);
 
 	# Determine adjacent Rank Numbers, and if less than zero, set to zero
-
 	# Convert adjacent Rank Numbers back to Ranks
+	$previous_rank_number = $warrior_one_rank_number - 1;
+	if ($previous_rank_number < 0) { $previous_rank_number = 0; }
+	$previous_rank = $arrRanks[$previous_rank_number][0];
+	writeLog("chooseSuitableWarrior(): Previous Rank Number: " . $previous_rank_number . ", Rank: " . $previous_rank);
+	
+	$next_rank_number = $warrior_one_rank_number + 1;
+	$next_rank = $arrRanks[$next_rank_number][0];
+	writeLog("chooseSuitableWarrior(): Next Rank Number: " . $next_rank_number . ", Rank: " . $next_rank);
 
 	# Search for Warrior;
 	#   That's not dead
 	#   That is one of the three ranks
 	#   That is not Warrior One
-
+	$sql = "SELECT warrior_id FROM roguewarrior.warrior WHERE (warrior_rank = '" . $warrior_one_rank . "' OR warrior_rank = '" . $previous_rank . "' OR warrior_rank = '" . $next_rank . "') AND warrior_id NOT LIKE " . $warrior_one_id . " AND warrior_status NOT LIKE 'Dead';";
+	writeLog("chooseSuitableWarrior(): SQL: " . $sql);
+	$results = doSearch($sql);
+	
+	writeLog("chooseSuitableWarrior(): Possible Foes: " . count($results));
+	$rows = count($results) - 1;
+	
+	
+	$warrior_two = $results[rand(0,$rows)]['warrior_id'];
+	writeLog("chooseSuitableWarrior(): Warrior 2: " . $warrior_two);
+	
 	return $warrior_two;
 
 }
@@ -102,8 +170,11 @@ function chooseSuitableWarrior($warrior_one_id) {
 function getWarriorAttribute($warrior_id, $attribute) {
 
 	writeLog("getWarriorAttribute()");
-
-
+	
+	$sql = "SELECT " . $attribute . " FROM roguewarrior.warrior WHERE warrior_id = " . $warrior_id . ";";
+	$results = doSearch($sql);
+	
+	return $results[0][$attribute];
 
 }
 
@@ -112,8 +183,10 @@ function getAllWarriorDetails($warrior_id) {
 	writeLog("getAllWarriorDetails()");
 
 	# Search for warrior
-
-	return $arrDetails;
+	$sql = "SELECT * FROM roguewarrior.warrior WHERE warrior_id = " . $warrior_id . ";";
+	$results = doSearch($sql);
+	
+	return $results[0];
 
 }
 
@@ -127,7 +200,7 @@ function buildRankArray() {
 	$arrRanks = array();
 	for ($r = 0; $r < $rows; $r++) {
 		$row_details = explode(",", $file_contents[$r]);
-		$arrRanks[$r] = array($row_details[0] => $row_details[1]);
+		$arrRanks[$r] = array($row_details[0], $row_details[1]);
 	}
 
 	return $arrRanks;
