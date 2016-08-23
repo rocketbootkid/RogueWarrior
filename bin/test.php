@@ -8,9 +8,7 @@
 	include('functions/fight_functions.php');
 	
 	
-	#$warriors = chooseWarriors();
-	#Fight($warriors);
-		doFight(chooseWarriors());	
+	generateWarrior(0);	doFight(chooseWarriors());	
 	displayLog();
 
 ?>

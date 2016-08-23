@@ -14,3 +14,11 @@ CREATE TABLE `roguewarrior`.`warrior` (
   `warrior_status` VARCHAR(45) NULL,
   `warrior_parent` INT NULL,
   PRIMARY KEY (`warrior_id`));
+  
+  CREATE TABLE `roguewarrior`.`results` (
+  `fight_id` INT NOT NULL AUTO_INCREMENT,
+  `fight_winner` INT NULL,
+  `fight_loser` INT NULL,
+  `fight_rounds` INT NULL,
+  `fight_log` MEDIUMTEXT NULL,
+  PRIMARY KEY (`fight_id`));

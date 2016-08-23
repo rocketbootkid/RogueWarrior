@@ -34,7 +34,8 @@ function generateWarrior($parent_id) {
 									'Alive',
 									'" . $parent . "'
 								);";
-								
+				
+	writeLog("generateWarrior(): DML: " . $dml);				
 	$status = doInsert($dml);
 		
 }

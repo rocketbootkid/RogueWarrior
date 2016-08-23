@@ -1,6 +1,6 @@
 <?php
 
-function doFight($warriors) {
+function doFight($warriors, $mode) {
 
 	writeLog("doFight(): Warriors: " . $warriors);
 	
@@ -36,13 +36,13 @@ function doFight($warriors) {
 	}
 	
 	$round = 0;
-	$fight_log = "<table cellpadding=3 cellspacing=3 border=1><tr><td>Round<td>Attacker - " . $arrAttacker['warrior_name'] . "<td>Defender - " . $arrDefender['warrior_name'] . "</tr>";
+	$fight_log = "<table cellpadding=3 cellspacing=3 border=1><tr bgcolor=#ddd><td>Round<td>Attacker - " . $arrAttacker['warrior_name'] . "<td>Defender - " . $arrDefender['warrior_name'] . "</tr>";
 	
 	while ($arrAttacker['warrior_hp'] > 0 && $arrDefender['warrior_hp'] > 0) {
 
 		$round++;
 		writeLog("doFight(): Round " . $round . "!");
-		$fight_log = $fight_log . "<tr><td>" . $round;
+		$fight_log = $fight_log . "<tr><td align=center>" . $round;
 
 		# First attacks / Second Defends
 		
@@ -102,28 +102,34 @@ function doFight($warriors) {
 	# Declare the winner
 	if ($arrAttacker['warrior_hp'] > 0 && $arrDefender['warrior_hp'] <= 0) { # Attacker wins
 		$winner = $arrAttacker['warrior_id'];
-		$fight_log = $fight_log . "<tr><td colspan=3 align=center>After " . $round . " rounds, " . $arrAttacker['warrior_name'] . " is the victor!</tr>";
+		$loser = $arrDefender['warrior_id'];
+		$fight_log = $fight_log . "<tr bgcolor=#ddd><td colspan=3 align=center>After " . $round . " rounds, " . $arrAttacker['warrior_name'] . " is the victor!</tr>";
 	} elseif ($arrDefender['warrior_hp'] > 0 && $arrAttacker['warrior_hp'] <= 0) { # Defender wins
 		$winner = $arrDefender['warrior_id'];
-		$fight_log = $fight_log . "<tr><td colspan=3 align=center>After " . $round . " rounds, " . $arrDefender['warrior_name'] . " is the victor!</tr>";
+		$loser = $arrAttacker['warrior_id'];
+		$fight_log = $fight_log . "<tr bgcolor=#ddd><td colspan=3 align=center>After " . $round . " rounds, " . $arrDefender['warrior_name'] . " is the victor!</tr>";
 	} else {
 		
 	}
 	
 	$fight_log = $fight_log . "</table>";
+	 
+	# Don't output the data so that redirect page will work.
+	if ($mode != "silent") {
+		echo $fight_log;
+	}
 	  
-	echo $fight_log;
+	writeLog("doFight(): Fight Log length: " . strlen($fight_log));
 	  
 	# Write fight log to database
-	# fight_id
-	# winner_id
-	# loser_id
-	# fight_log (string containing details of the fight as a table)
+	recordFight($winner, $loser, $round, $fight_log);
 
 	# Update loser warrior record / set status to dead
+	killLoser($loser);
 
 	# Handle winner updates
 	# If title changes (e.g. 5, 10, 15 wins, etc), also randomly choose attribute to buff
+	# Also spawn new warrior with 2 of the parent's stats kept, and the others random 
 
 }
 
@@ -144,28 +150,16 @@ function chooseRandomWarrior() {
 
 	writeLog("chooseRandomWarrior()");
 
-	$exists = 0;
-		
-	while ($exists != 1) {
-		
-		# Count the number of non-dead warriors in the database
-		$count = countWarriors();
-		  
-		# Select one warrior and extract their warrior_id
-		srand();
-		$randomwarrior = rand(1, $count);
-		writeLog("chooseRandomWarrior(): Warrior 1: " . $randomwarrior);
-
-		# Check he exists
-		$sql = "SELECT count(*) FROM roguewarrior.warrior WHERE warrior_id = " . $randomwarrior . ";";
-		$results = doSearch($sql);
-		$exists = $results[0]['count(*)']; # Should be 1; only one warrior with that id
-		writeLog("chooseRandomWarrior(): Check warrior exists?: " . $exists);
+	$sql = "SELECT warrior_id FROM roguewarrior.warrior WHERE warrior_status = 'Alive';";		
+	writeLog("chooseRandomWarrior(): SQL: " . $sql);
+	$results = doSearch($sql);
+	$count = count($results);
 	
-	}
+	$randomwarrior = $results[rand(0, $count)];
+	writeLog("chooseRandomWarrior(): Random Warrior: " . $randomwarrior);
 	
 	return $randomwarrior;
-	  
+		 
 }
 
 function chooseSuitableWarrior($warrior_one_id) {
@@ -253,7 +247,36 @@ function buildRankArray() {
 
 }
 
+function recordFight($winner, $loser, $round, $fight_log) {
+	
+	writeLog("recordFight()");
+	
+	$dml = "INSERT INTO roguewarrior.results (fight_winner, 
+									fight_loser, 
+									fight_rounds, 
+									fight_log) 
+								VALUES (
+									" . $winner . ",
+									" . $loser . ",
+									" . $round . ",
+									'" . $fight_log . "'
+								);";
 
+	writeLog("recordFight(): DML: " . $dml);												
+	$status = doInsert($dml);
+	
+}
+
+function killLoser($loser) {
+	
+	writeLog("killLoser()");
+	
+	$dml = "UPDATE roguewarrior.warrior SET warrior_status = 'Dead' WHERE warrior_id = " . $loser . ";";
+
+	writeLog("killLoser(): DML: " . $dml);												
+	$status = doInsert($dml);
+	
+}
 
 
 ?>
