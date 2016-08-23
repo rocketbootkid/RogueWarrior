@@ -130,6 +130,29 @@ function allWarriorFights($warrior_id) {
 	
 	writeLog("allWarriorFights()");
 	
+	echo "<p><table cellpadding=3 cellspacing=1 border=1 align=center width=500px>\n";
+	echo "<tr bgcolor=#ddd><td align=center colspan=2><h3>Fight History</h3></tr>";
+	
+	# Loss
+	$sql = "SELECT * FROM roguewarrior.results WHERE fight_loser = " . $warrior_id . " ORDER BY fight_id DESC LIMIT 1;";
+	writeLog("allWarriorFights(): SQL: " . $sql);
+	$results = doSearch($sql);
+	foreach ($results as $fight) {
+		echo "<tr><td align=center><a href='fight.php?fight=" . $fight['fight_id'] . "'>LOSS</a><td>Defeated by <a href='warrior.php?warrior=" . $fight['fight_winner'] . "'>The " . getWarriorAttribute($fight['fight_winner'], 'warrior_rank') . " " . getWarriorAttribute($fight['fight_winner'], 'warrior_name') . "</a> in " . $fight['fight_rounds'] . " rounds.</tr>";	
+	}	
+	
+	# Wins
+	$sql = "SELECT * FROM roguewarrior.results WHERE fight_winner = " . $warrior_id . " ORDER BY fight_id DESC;";
+	writeLog("allWarriorFights(): SQL: " . $sql);
+	$results = doSearch($sql);
+
+	foreach ($results as $fight) {
+		
+		echo "<tr><td align=center><a href='fight.php?fight=" . $fight['fight_id'] . "'>WIN</a><td>Defeated <a href='warrior.php?warrior=" . $fight['fight_loser'] . "'>The " . getWarriorAttribute($fight['fight_loser'], 'warrior_rank') . " " . getWarriorAttribute($fight['fight_loser'], 'warrior_name') . "</a> in " . $fight['fight_rounds'] . " rounds.</tr>";
+		
+	}
+	
+	echo "</table>";
 	
 }
 

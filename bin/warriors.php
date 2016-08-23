@@ -27,7 +27,7 @@
 	
 	echo mostRecentFights(5);
 	
-	#displayLog();
+	displayLog();
 	
 ?>
 

@@ -6,6 +6,9 @@
 
 <body>
 
+<div align=center><a href="roguewarrior.php">Home</a> | <a href="warriors.php">Warriors</a> | <a href="fights.php">Fights</a></div>
+<p>
+
 <?php
 
 	if (isset($_GET['warrior'])) {
@@ -21,7 +24,7 @@
 		
 		displayWarriorStats($_GET['warrior']);
 		
-		echo allWarriorFights($_GET['warrior']);
+		echo "<p>" . allWarriorFights($_GET['warrior']);
 		
 		#displayLog();
 

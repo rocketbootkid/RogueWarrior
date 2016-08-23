@@ -154,8 +154,10 @@ function chooseRandomWarrior() {
 	writeLog("chooseRandomWarrior(): SQL: " . $sql);
 	$results = doSearch($sql);
 	$count = count($results);
+	writeLog("chooseRandomWarrior(): Potential Warriors: " . $count);
 	
-	$randomwarrior = $results[rand(0, $count)];
+	$randomwarrior = $results[rand(0, $count)]['warrior_id'];
+
 	writeLog("chooseRandomWarrior(): Random Warrior: " . $randomwarrior);
 	
 	return $randomwarrior;
