@@ -13,14 +13,26 @@ function doFight($warriors) {
 	$arrWarriorTwoStats = getAllWarriorDetails($warrior_two);
 
 	# See who gets to attack first (Speed)
-	if ($arrWarriorOneStats['warrior_spd'] > $arrWarriorTwoStats['warrior_spd']) {
+	if ($arrWarriorOneStats['warrior_spd'] > $arrWarriorTwoStats['warrior_spd']) { # Warrior 1 is faster
 		$arrAttacker = $arrWarriorOneStats;
 		$arrDefender = $arrWarriorTwoStats;
 		writeLog("doFight(): Warrior 1, " . $arrAttacker['warrior_name'] . " goes first, then " . $arrDefender['warrior_name']);
-	} else {
+	} elseif ($arrWarriorOneStats['warrior_spd'] < $arrWarriorTwoStats['warrior_spd']) { # Warrior 2 is faster
 		$arrAttacker = $arrWarriorTwoStats;
 		$arrDefender = $arrWarriorOneStats;
 		writeLog("doFight(): Warrior 2, " . $arrAttacker['warrior_name'] . " goes first, then " . $arrDefender['warrior_name']);
+	} else { # Same speed
+		writeLog("doFight(): Both Warriors just as fast!");
+		$choice = rand(0, 1);
+		if ($choice == 0) { # Warrior 1
+			$arrAttacker = $arrWarriorOneStats;
+			$arrDefender = $arrWarriorTwoStats;
+			writeLog("doFight(): Warrior 1, " . $arrAttacker['warrior_name'] . " goes first, then " . $arrDefender['warrior_name']);
+		} else { # Warrior 2
+			$arrAttacker = $arrWarriorTwoStats;
+			$arrDefender = $arrWarriorOneStats;
+			writeLog("doFight(): Warrior 2, " . $arrAttacker['warrior_name'] . " goes first, then " . $arrDefender['warrior_name']);
+		}
 	}
 	
 	$round = 0;
@@ -39,7 +51,7 @@ function doFight($warriors) {
 			writeLog("doFight(): " . $arrAttacker['warrior_name'] . " hits!");
 			# If hits, how much damage
 			$damage = rand(1, $arrAttacker['warrior_str']) - floor(rand(1, $arrDefender['warrior_con'])/2);
-			if ($damage < 0) { $damage = 0; }
+			if ($damage < 1) { $damage = 1; }
 			writeLog("doFight(): " . $arrAttacker['warrior_name'] . " does " . $damage . " damage to " . $arrDefender['warrior_name']);
 			
 			# Take damage away from Defender HP
@@ -56,22 +68,32 @@ function doFight($warriors) {
 		
 		# Second Attacks / First Defends
 
-		# See if Attacker Hits
-		if (rand(0, $arrDefender['warrior_acc']) >= rand(0, $arrAttacker['warrior_dex'])) {
-			writeLog("doFight(): " . $arrDefender['warrior_name'] . " hits!");
-			# If hits, how much damage
-			$damage = rand(1, $arrDefender['warrior_str']) - floor(rand(1, $arrAttacker['warrior_con'])/2);
-			writeLog("doFight(): " . $arrDefender['warrior_name'] . " does " . $damage . " damage to " . $arrAttacker['warrior_name']);
-			
-			# Take damage away from Defender
-			$arrAttacker['warrior_hp'] = $arrAttacker['warrior_hp'] - $damage;
-			
-			$fight_log = $fight_log . "<td>" . $arrDefender['warrior_name'] . " hits " . $arrAttacker['warrior_name'] . " for " . $damage . " points of damage!</br>" . $arrAttacker['warrior_name'] . " has " . $arrAttacker['warrior_hp'] . "HP remaining.</tr>";
-			
+		if ($arrDefender['warrior_acc'] > 0) { # Check that defender is not already dead
+		
+			# See if Attacker Hits
+			if (rand(0, $arrDefender['warrior_acc']) >= rand(0, $arrAttacker['warrior_dex'])) {
+				writeLog("doFight(): " . $arrDefender['warrior_name'] . " hits!");
+				# If hits, how much damage
+				$damage = rand(1, $arrDefender['warrior_str']) - floor(rand(1, $arrAttacker['warrior_con'])/2);
+				if ($damage < 1) { $damage = 1; }
+				writeLog("doFight(): " . $arrDefender['warrior_name'] . " does " . $damage . " damage to " . $arrAttacker['warrior_name']);
+				
+				# Take damage away from Defender
+				$arrAttacker['warrior_hp'] = $arrAttacker['warrior_hp'] - $damage;
+				
+				$fight_log = $fight_log . "<td>" . $arrDefender['warrior_name'] . " hits " . $arrAttacker['warrior_name'] . " for " . $damage . " points of damage!</br>" . $arrAttacker['warrior_name'] . " has " . $arrAttacker['warrior_hp'] . "HP remaining.</tr>";
+				
+			} else {
+				writeLog("doFight(): " . $arrDefender['warrior_name'] . " misses!");
+				
+				$fight_log = $fight_log . "<td>" . $arrDefender['warrior_name'] . " misses " . $arrAttacker['warrior_name'] . "!</br>" . $arrAttacker['warrior_name'] . " has " . $arrAttacker['warrior_hp'] . "HP remaining.</tr>";
+				
+			}
+		
 		} else {
-			writeLog("doFight(): " . $arrDefender['warrior_name'] . " misses!");
+			writeLog("doFight(): " . $arrDefender['warrior_name'] . " already dead!");
 			
-			$fight_log = $fight_log . "<td>" . $arrDefender['warrior_name'] . " misses " . $arrAttacker['warrior_name'] . "!</br>" . $arrAttacker['warrior_name'] . " has " . $arrAttacker['warrior_hp'] . "HP remaining.</tr>";
+			$fight_log = $fight_log . "<td>" . $arrDefender['warrior_name'] . " does nothing, because he is dead.</tr>";
 			
 		}
 		
@@ -122,14 +144,26 @@ function chooseRandomWarrior() {
 
 	writeLog("chooseRandomWarrior()");
 
-	# Count the number of non-dead warriors in the database
-	$count = countWarriors();
-	  
-	# Select one warrior and extract their warrior_id
-	srand();
-	$randomwarrior = rand(1, $count);
-	writeLog("chooseRandomWarrior(): Warrior 1: " . $randomwarrior);
+	$exists = 0;
+		
+	while ($exists != 1) {
+		
+		# Count the number of non-dead warriors in the database
+		$count = countWarriors();
+		  
+		# Select one warrior and extract their warrior_id
+		srand();
+		$randomwarrior = rand(1, $count);
+		writeLog("chooseRandomWarrior(): Warrior 1: " . $randomwarrior);
 
+		# Check he exists
+		$sql = "SELECT count(*) FROM roguewarrior.warrior WHERE warrior_id = " . $randomwarrior . ";";
+		$results = doSearch($sql);
+		$exists = $results[0]['count(*)']; # Should be 1; only one warrior with that id
+		writeLog("chooseRandomWarrior(): Check warrior exists?: " . $exists);
+	
+	}
+	
 	return $randomwarrior;
 	  
 }
@@ -188,6 +222,7 @@ function getWarriorAttribute($warrior_id, $attribute) {
 	return $results[0][$attribute];
 
 }
+
 
 function getAllWarriorDetails($warrior_id) {
 
