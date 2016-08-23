@@ -153,7 +153,7 @@ function chooseRandomWarrior() {
 	$sql = "SELECT warrior_id FROM roguewarrior.warrior WHERE warrior_status = 'Alive';";		
 	writeLog("chooseRandomWarrior(): SQL: " . $sql);
 	$results = doSearch($sql);
-	$count = count($results);
+	$count = count($results) - 1;
 	writeLog("chooseRandomWarrior(): Potential Warriors: " . $count);
 	
 	$randomwarrior = $results[rand(0, $count)]['warrior_id'];

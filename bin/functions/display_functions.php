@@ -105,7 +105,7 @@ function mostRecentFights($number) {
 	
 	$text = $text . "</table>";
 	
-	return $text;
+	echo $text;
 	
 }
 

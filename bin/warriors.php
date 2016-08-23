@@ -25,9 +25,9 @@
 	
 	liveWarriors();
 	
-	echo mostRecentFights(5);
+	mostRecentFights(10);
 	
-	displayLog();
+	#displayLog();
 	
 ?>
 
