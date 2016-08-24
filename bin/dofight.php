@@ -9,8 +9,8 @@
 	include('functions/fight_functions.php');
 
 	# If there aren't enough warriors, create some new ones
-	if (countWarriors() < 10) {
-		for ($w = 0; $w < 5; $w++) { generateWarrior(0); }
+	if (countWarriors() < 20) {
+		for ($w = 0; $w < 10; $w++) { generateWarrior(0); }
 	}
 	
 	doFight(chooseWarriors(), "silent");

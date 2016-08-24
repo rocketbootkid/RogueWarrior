@@ -128,9 +128,8 @@ function doFight($warriors, $mode) {
 	killLoser($loser);
 
 	# Handle winner updates
-	# If title changes (e.g. 5, 10, 15 wins, etc), also randomly choose attribute to buff
-	# Also spawn new warrior with 2 of the parent's stats kept, and the others random 
-
+	updateWinner($winner);
+	
 }
 
 function chooseWarriors() {
@@ -242,7 +241,7 @@ function buildRankArray() {
 	$arrRanks = array();
 	for ($r = 0; $r < $rows; $r++) {
 		$row_details = explode(",", $file_contents[$r]);
-		$arrRanks[$r] = array($row_details[0], $row_details[1]);
+		$arrRanks[$r] = array(trim($row_details[0]), trim($row_details[1]));
 	}
 
 	return $arrRanks;
@@ -277,6 +276,76 @@ function killLoser($loser) {
 
 	writeLog("killLoser(): DML: " . $dml);												
 	$status = doInsert($dml);
+	
+}
+
+function getWarriorVictories($warrior_id) {
+	
+	writeLog("getWarriorVictories()");
+	
+	$sql = "SELECT count(*) FROM roguewarrior.results WHERE fight_winner = " . $warrior_id . ";";
+	$results = doSearch($sql);
+	
+	writeLog("getWarriorVictories(): Victories: " . $results[0]['count(*)']);
+	
+	return $results[0]['count(*)'];
+	
+}
+
+function updateWinner($warrior_id) {
+	
+	writeLog("updateWinner()");
+		
+	# Get winner's current number of victories
+	$victories = getWarriorVictories($warrior_id);
+	writeLog("doFight(): Victories: " . $victories);
+	
+	# Extract that rank title from array
+	$new_rank = findRank($victories);
+	writeLog("updateWinner(): New Rank: " . $new_rank);
+	
+	if ($new_rank != "") {
+		# Update winner's title
+		$dml = "UPDATE roguewarrior.warrior SET warrior_rank = '" . $new_rank . "' WHERE warrior_id = " . $warrior_id . ";";
+		writeLog("updateWinner(): DML: " . $dml);												
+		$status = doInsert($dml);
+	}
+	
+	# Buff random attribute
+	$arrWarriorStats = getAllWarriorDetails(300);
+	$arrAttributes = array('warrior_acc', 'warrior_str', 'warrior_spd', 'warrior_dex', 'warrior_con');
+	$attribute = $arrAttributes[rand(0, 4)];
+
+	$dml = "UPDATE roguewarrior.warrior SET " . $attribute . " = " . $attribute . " + 1 WHERE warrior_id = 300;";
+	writeLog("updateWinner(): DML: " . $dml);												
+	$status = doInsert($dml);	
+	
+	# Also spawn new warrior with 2 of the parent's stats kept, and the others random 
+	
+	
+}
+
+function findRank($new_rank_id) {
+	
+	writeLog("findRank(): New Rank ID: " . $new_rank_id);
+	
+	$arrRanks = buildRankArray();
+	
+	#var_dump($arrRanks);
+	
+	$new_rank = "";
+	
+	foreach ($arrRanks as $rank) {
+	
+		if ($rank[1] == $new_rank_id) {
+			$new_rank = $rank[0];	
+		}
+		
+	}
+	
+	writeLog("findRank(): New Rank: " . $new_rank);
+	
+	return $new_rank;
 	
 }
 
