@@ -5,12 +5,15 @@ function generateWarrior($parent_id) {
 	writeLog("generateWarrior()");
 	
 	$parent = 0;
-	if ($parent_id != 0) {
-		$parent = $parent_id;
-	}
-	
 	$name = generateWarriorName();
 	$stats = generateWarriorStats();
+
+	if ($parent_id != 0) {
+		$parent = $parent_id;
+		
+		# Pick highest attribute from parent, and use that
+		
+	}
 	
 	$dml = "INSERT INTO roguewarrior.warrior (warrior_name, 
 									warrior_rank, 

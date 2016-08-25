@@ -109,7 +109,10 @@ function doFight($warriors, $mode) {
 		$loser = $arrAttacker['warrior_id'];
 		$fight_log = $fight_log . "<tr bgcolor=#ddd><td colspan=3 align=center>After " . $round . " rounds, " . $arrDefender['warrior_name'] . " is the victor!</tr>";
 	} else {
-		
+		writeLog("doFight(): Attacker HP: " . $arrAttacker['warrior_hp']);
+		writeLog("doFight(): Defender HP: " . $arrDefender['warrior_hp']);
+		$winner = $arrAttacker['warrior_id'];
+		$loser = $arrDefender['warrior_id'];
 	}
 	
 	$fight_log = $fight_log . "</table>";
@@ -321,7 +324,7 @@ function updateWinner($warrior_id) {
 	$status = doInsert($dml);	
 	
 	# Also spawn new warrior with 2 of the parent's stats kept, and the others random 
-	
+	#generateWarrior($parent_id)
 	
 }
 
