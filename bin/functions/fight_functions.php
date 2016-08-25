@@ -324,7 +324,7 @@ function updateWinner($warrior_id) {
 	$status = doInsert($dml);	
 	
 	# Also spawn new warrior with 2 of the parent's stats kept, and the others random 
-	#generateWarrior($parent_id)
+	generateWarrior($warrior_id);
 	
 }
 

@@ -12,6 +12,7 @@ function generateWarrior($parent_id) {
 		$parent = $parent_id;
 		
 		# Pick highest attribute from parent, and use that
+		$stats = getWarriorMaxStat($parent_id, $stats);
 		
 	}
 	
@@ -143,11 +144,36 @@ function countWarriors() {
 	
 }
 
+function getWarriorMaxStat($warrior_id, $stats) {
+	
+	writeLog("getWarriorMaxStat()");
+	
+	$parent_stats = getAllWarriorDetails($warrior_id);
+	
+	$max_stat = 0;
+	$max_stat_value = "";
+	
+	if (intval($parent_stats['warrior_acc']) > $max_stat) {
+		$max_stat_value = intval($parent_stats['warrior_acc']);
+		$max_stat= "accuracy";
+	} elseif (intval($parent_stats['warrior_str']) > $max_stat) {
+		$max_stat_value = intval($parent_stats['warrior_str']);
+		$max_stat= "strength";
+	} elseif (intval($parent_stats['warrior_spd']) > $max_stat) {
+		$max_stat_value = intval($parent_stats['warrior_spd']);
+		$max_stat= "speed";
+	} elseif (intval($parent_stats['warrior_dex']) > $max_stat) {
+		$max_stat_value  = intval($parent_stats['warrior_dex']);
+		$max_stat= "dexterity";
+	} elseif (intval($parent_stats['warrior_con']) > $max_stat) {
+		$max_stat_value = intval($parent_stats['warrior_con']);
+		$max_stat= "constitution";
+	}
+	
+	$stats[$max_stat] = $max_stat_value;
 
-
-
-
-
-
+	return $stats;
+	
+}
 
 ?>
