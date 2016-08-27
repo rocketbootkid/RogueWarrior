@@ -2,6 +2,8 @@
 
 function generateWarrior($parent_id) {
 	
+	#HEAD:Generates a new warrior (optionally with parent)
+	
 	writeLog("generateWarrior()");
 	
 	$parent = 0;
@@ -48,6 +50,8 @@ function generateWarrior($parent_id) {
 
 function generateWarriorName() {
 	
+	#HEAD:Generates a warrior name
+	
 	writeLog("generateWarriorName()");
 	$name = generateWarriorForename() . " the " . getWarriorTitle(); 
 	writeLog("generateWarriorName(): " . $name);
@@ -56,6 +60,8 @@ function generateWarriorName() {
 }
 
 function generateWarriorForename() {
+	
+	#HEAD:Generates a warrior forename
 	
 	writeLog("generateWarriorForename()");
 	
@@ -92,6 +98,8 @@ function generateWarriorForename() {
 
 function getWarriorTitle() {
 	
+	#HEAD:Generates a warrior's title
+	
 	writeLog("getWarriorTitle()");
 	
 	$titles = file('functions/lists/adjectives.txt');
@@ -105,6 +113,8 @@ function getWarriorTitle() {
 }
 
 function generateWarriorStats() {
+	
+	#HEAD:Generates a warrior's stats
 	
 	writeLog("generateWarriorStats()");
 	
@@ -137,6 +147,8 @@ function generateWarriorStats() {
 
 function countWarriors() {
 	
+	#HEAD:Counts how many live warriors there are
+	
 	writeLog("countWarriors()");
 	
 	$sql = "SELECT count(*) FROM roguewarrior.warrior WHERE warrior_status != 'Dead';";
@@ -147,6 +159,8 @@ function countWarriors() {
 }
 
 function getWarriorMaxStat($warrior_id, $stats) {
+	
+	#HEAD:Determines a warrior maximum stat
 	
 	writeLog("getWarriorMaxStat()");
 	

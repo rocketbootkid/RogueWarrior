@@ -367,17 +367,17 @@ function updateWinner($warrior_id) {
 		
 		# Also spawn new warrior with 2 of the parent's stats kept, and the others random 
 		generateWarrior($warrior_id);
+
+		# Buff random attribute
+		$arrWarriorStats = getAllWarriorDetails(300);
+		$arrAttributes = array('warrior_acc', 'warrior_str', 'warrior_spd', 'warrior_dex', 'warrior_con');
+		$attribute = $arrAttributes[rand(0, 4)];
+
+		$dml = "UPDATE roguewarrior.warrior SET " . $attribute . " = " . $attribute . " + 1 WHERE warrior_id = " . $warrior_id . ";";
+		writeLog("updateWinner(): DML: " . $dml);												
+		$status = doInsert($dml);	
 		
 	}
-	
-	# Buff random attribute
-	$arrWarriorStats = getAllWarriorDetails(300);
-	$arrAttributes = array('warrior_acc', 'warrior_str', 'warrior_spd', 'warrior_dex', 'warrior_con');
-	$attribute = $arrAttributes[rand(0, 4)];
-
-	$dml = "UPDATE roguewarrior.warrior SET " . $attribute . " = " . $attribute . " + 1 WHERE warrior_id = " . $warrior_id . ";";
-	writeLog("updateWinner(): DML: " . $dml);												
-	$status = doInsert($dml);	
 	
 }
 

@@ -19,7 +19,7 @@ function legendaryWarriors($limit) {
 	
 	writeLog("legendaryWarriors()");
 	
-	$sql = "SELECT warrior_id FROM roguewarrior.warrior ORDER BY warrior_victories DESC;";
+	$sql = "SELECT warrior_id FROM roguewarrior.warrior ORDER BY warrior_victories DESC LIMIT " . $limit . ";";
 	$results = doSearch($sql);
 	
 	displayWarriors($results);
@@ -281,7 +281,12 @@ function displayWarriorFamily($warrior_id) {
 	$parent_id = getWarriorAttribute($warrior_id, 'warrior_parent');
 	$parent_name = getWarriorAttribute($parent_id, 'warrior_name');
 	$parent_rank = getWarriorAttribute($parent_id, 'warrior_rank');
-	$text = $text . "<tr><td width=50px>Father<td><a href='warrior.php?warrior=" . $parent_id . "'>The " . $parent_rank . " " . $parent_name . "</a></tr>";
+	if ($parent_name != "" && $parent_rank != "") {
+		$text = $text . "<tr><td width=50px>Father<td><a href='warrior.php?warrior=" . $parent_id . "'>The " . $parent_rank . " " . $parent_name . "</a></tr>";
+	} else {
+		$text = $text . "<tr><td width=50px>Father<td>Some nameless warrior</tr>";
+	}
+	
 	
 	# Get Warrior Name
 	$warrior_name = getWarriorAttribute($warrior_id, 'warrior_name');

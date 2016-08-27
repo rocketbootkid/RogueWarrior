@@ -12,6 +12,7 @@
 <a href="legends.php">Legends</a> | 
 <a href="fights.php">Fights</a> | 
 <a href="dofight.php" target="_blank">Begin fights</a> (Close the page to stop)<p>
+<a href="documentation.php" target="_blank">Documentation</a> 
 
 <?php
 
