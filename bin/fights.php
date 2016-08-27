@@ -22,7 +22,7 @@
 	
 	displayFights();
 	
-	#displayLog();
+	displayLog();
 
 ?>
 

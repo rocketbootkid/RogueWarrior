@@ -25,7 +25,8 @@ function generateWarrior($parent_id) {
 									warrior_dex, 
 									warrior_con, 
 									warrior_status, 
-									warrior_parent) 
+									warrior_parent,
+									warrior_victories) 
 								VALUES (
 									'" . $name . "',
 									'Trainee',
@@ -36,7 +37,8 @@ function generateWarrior($parent_id) {
 									'" . $stats['dexterity'] . "',
 									'" . $stats['constitution'] . "',
 									'Alive',
-									'" . $parent . "'
+									'" . $parent . "',
+									'0'
 								);";
 				
 	writeLog("generateWarrior(): DML: " . $dml);				

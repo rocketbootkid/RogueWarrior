@@ -29,10 +29,10 @@
 	
 	mostRecentFights(10);
 	
-	#displayLog();
-	
 ?>
 
 </div>
+
+<?php 	displayLog(); ?>
 
 </html>

@@ -1,6 +1,8 @@
 <?php
 
 function doFight($warriors, $mode) {
+	
+	#HEAD: Handles the fight between the two warriors
 
 	writeLog("doFight(): Warriors: " . $warriors);
 	
@@ -128,7 +130,7 @@ function doFight($warriors, $mode) {
 	recordFight($winner, $loser, $round, $fight_log);
 
 	# Update loser warrior record / set status to dead
-	killLoser($loser);
+	updateLoser($loser);
 
 	# Handle winner updates
 	updateWinner($winner);
@@ -136,6 +138,8 @@ function doFight($warriors, $mode) {
 }
 
 function chooseWarriors() {
+	
+	#HEAD:Handles the selection of the two warriors
 	
 	writeLog("chooseWarriors()");
 	
@@ -149,6 +153,8 @@ function chooseWarriors() {
 
 }
 function chooseRandomWarrior() {
+	
+	#HEAD:Chooses a random warrior
 
 	writeLog("chooseRandomWarrior()");
 
@@ -167,6 +173,8 @@ function chooseRandomWarrior() {
 }
 
 function chooseSuitableWarrior($warrior_one_id) {
+	
+	#HEAD:Chooses a suitable opponent for the provided warrior
 	
 	writeLog("chooseSuitableWarrior(): Warrior 1: " . $warrior_one_id);
 
@@ -212,29 +220,41 @@ function chooseSuitableWarrior($warrior_one_id) {
 
 function getWarriorAttribute($warrior_id, $attribute) {
 
+	#HEAD:Returns the selected attribute for the provided warrior
+
 	writeLog("getWarriorAttribute()");
 	
 	$sql = "SELECT " . $attribute . " FROM roguewarrior.warrior WHERE warrior_id = " . $warrior_id . ";";
 	$results = doSearch($sql);
+	if (count($results) == 0) { 
+		return "";
+	} else {
+		return $results[0][$attribute];
+	}
 	
-	return $results[0][$attribute];
-
 }
 
 
 function getAllWarriorDetails($warrior_id) {
+
+	#HEAD:Returns all attributes for the provided warrior
 
 	writeLog("getAllWarriorDetails()");
 
 	# Search for warrior
 	$sql = "SELECT * FROM roguewarrior.warrior WHERE warrior_id = " . $warrior_id . ";";
 	$results = doSearch($sql);
-	
-	return $results[0];
+	if (count($results) > 0) {
+		return $results[0];
+	} else {
+		return "";
+	}
 
 }
 
 function buildRankArray() {
+	
+	#HEAD:Builds the array of the ranks / levels
 	
 	writeLog("buildRankArray()");
 
@@ -252,6 +272,8 @@ function buildRankArray() {
 }
 
 function recordFight($winner, $loser, $round, $fight_log) {
+	
+	#HEAD:Records the details of the fight
 	
 	writeLog("recordFight()");
 	
@@ -271,38 +293,68 @@ function recordFight($winner, $loser, $round, $fight_log) {
 	
 }
 
-function killLoser($loser) {
+function updateLoser($loser) {
 	
-	writeLog("killLoser()");
+	#HEAD:Updates the losing warrior
 	
-	$dml = "UPDATE roguewarrior.warrior SET warrior_status = 'Dead' WHERE warrior_id = " . $loser . ";";
-
-	writeLog("killLoser(): DML: " . $dml);												
-	$status = doInsert($dml);
+	writeLog("updateLoser()");
+	
+	# Determine how many victories for the loser
+	$victories = getWarriorVictories($loser);
+	
+	# if less than 5 delete them
+	if ($victories <= 5) {
+		$dml = "DELETE FROM roguewarrior.warrior WHERE warrior_id = " . $loser . ";";
+		writeLog("updateLoser(): DML: " . $dml);												
+		$status = doInsert($dml);	
+		
+	} else { # otherwise just make them dead
+		$dml = "UPDATE roguewarrior.warrior SET warrior_status = 'Dead' WHERE warrior_id = " . $loser . ";";
+		writeLog("updateLoser(): DML: " . $dml);												
+		$status = doInsert($dml);
+		
+	}
 	
 }
 
 function getWarriorVictories($warrior_id) {
 	
+	#HEAD:Returns the number of victories for the provided warrior
+	
 	writeLog("getWarriorVictories()");
 	
-	$sql = "SELECT count(*) FROM roguewarrior.results WHERE fight_winner = " . $warrior_id . ";";
+	return getWarriorAttribute($warrior_id, 'warrior_victories');
+	
+}
+
+function updateWarriorVictories($warrior_id) {
+
+	#HEAD:Updates the number of victories for the provided warrior
+	
+	writeLog("setWarriorVictories()");
+	
+	$dml = "UPDATE roguewarrior.warrior SET warrior_victories = warrior_victories + 1 WHERE warrior_id = " . $warrior_id . ";";
+	writeLog("updateWarriorVictories(): DML: " . $dml);												
+	$status = doInsert($dml);
+
+	$sql = "SELECT warrior_victories FROM roguewarrior.warrior WHERE warrior_id = " . $warrior_id . ";";
+	writeLog("updateWarriorVictories(): SQL: " . $sql);
 	$results = doSearch($sql);
 	
-	writeLog("getWarriorVictories(): Victories: " . $results[0]['count(*)']);
-	
-	return $results[0]['count(*)'];
+	return $results[0]['warrior_victories'];	
 	
 }
 
 function updateWinner($warrior_id) {
 	
-	writeLog("updateWinner()");
-		
-	# Get winner's current number of victories
-	$victories = getWarriorVictories($warrior_id);
-	writeLog("doFight(): Victories: " . $victories);
+	#HEAD:Updates the winning warrior
 	
+	writeLog("updateWinner()");
+	
+	# Update / Get winner's current number of victories
+	$victories = updateWarriorVictories($warrior_id);
+	writeLog("doFight(): New Victories: " . $victories);
+		
 	# Extract that rank title from array
 	$new_rank = findRank($victories);
 	writeLog("updateWinner(): New Rank: " . $new_rank);
@@ -312,6 +364,10 @@ function updateWinner($warrior_id) {
 		$dml = "UPDATE roguewarrior.warrior SET warrior_rank = '" . $new_rank . "' WHERE warrior_id = " . $warrior_id . ";";
 		writeLog("updateWinner(): DML: " . $dml);												
 		$status = doInsert($dml);
+		
+		# Also spawn new warrior with 2 of the parent's stats kept, and the others random 
+		generateWarrior($warrior_id);
+		
 	}
 	
 	# Buff random attribute
@@ -319,12 +375,9 @@ function updateWinner($warrior_id) {
 	$arrAttributes = array('warrior_acc', 'warrior_str', 'warrior_spd', 'warrior_dex', 'warrior_con');
 	$attribute = $arrAttributes[rand(0, 4)];
 
-	$dml = "UPDATE roguewarrior.warrior SET " . $attribute . " = " . $attribute . " + 1 WHERE warrior_id = 300;";
+	$dml = "UPDATE roguewarrior.warrior SET " . $attribute . " = " . $attribute . " + 1 WHERE warrior_id = " . $warrior_id . ";";
 	writeLog("updateWinner(): DML: " . $dml);												
 	$status = doInsert($dml);	
-	
-	# Also spawn new warrior with 2 of the parent's stats kept, and the others random 
-	generateWarrior($warrior_id);
 	
 }
 

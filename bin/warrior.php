@@ -22,11 +22,13 @@
 		include('functions/fight_functions.php');
 		include('functions/display_functions.php');
 		
-		displayWarriorStats($_GET['warrior']);
+		echo displayWarriorStats($_GET['warrior']);
+		echo "<p>";
+		echo displayWarriorFamily($_GET['warrior']);
+		echo "<p>";
+		echo allWarriorFights($_GET['warrior']);
 		
-		echo "<p>" . allWarriorFights($_GET['warrior']);
-		
-		#displayLog();
+		displayLog();
 
 	} else {
 		echo "Select a Warrior";

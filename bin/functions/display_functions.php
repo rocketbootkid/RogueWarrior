@@ -2,67 +2,33 @@
 
 function liveWarriors() {
 	
+	#HEAD:Lists the current live warriors, ordered by their victories, and their stats
+	
 	writeLog("liveWarriors()");
 	
-	$sql = "SELECT warrior_id FROM roguewarrior.warrior WHERE warrior_status = 'Alive';";
+	$sql = "SELECT warrior_id FROM roguewarrior.warrior WHERE warrior_status = 'Alive' ORDER BY warrior_victories DESC;";
 	$results = doSearch($sql);
 	
-	$arrWarriors = array();
-	
-	for ($w = 0; $w < count($results); $w++) {
-		
-		writeLog("liveWarriors(): Warrior ID: " . $results[$w]['warrior_id']);
-		
-		$details = array(getVictories($results[$w]['warrior_id']), $results[$w]['warrior_id']);
-		array_push($arrWarriors, $details);
-		
-	}
-	arsort($arrWarriors);
-	
-	displayWarriors($arrWarriors);
+	displayWarriors($results);
 	
 }
 
 function legendaryWarriors($limit) {
 	
+	#HEAD:Lists the best warriors ever, ordered by their victories, and their stats
+	
 	writeLog("legendaryWarriors()");
 	
-	$sql = "SELECT warrior_id FROM roguewarrior.warrior;";
+	$sql = "SELECT warrior_id FROM roguewarrior.warrior ORDER BY warrior_victories DESC;";
 	$results = doSearch($sql);
 	
-	$arrWarriors = array();
-	
-	for ($w = 0; $w < count($results); $w++) {
-		
-		writeLog("liveWarriors(): Warrior ID: " . $results[$w]['warrior_id']);
-		
-		$details = array(getVictories($results[$w]['warrior_id']), $results[$w]['warrior_id']);
-		array_push($arrWarriors, $details);
-		
-	}
-	arsort($arrWarriors);
-	
-	$arrTopX = array_slice($arrWarriors, 0, $limit);
-	
-	displayWarriors($arrTopX);
-	
-}
-
-function getVictories($warrior_id) {
-
-	writeLog("getVictories()");
-	
-	$sql = "SELECT count(*) FROM roguewarrior.results WHERE fight_winner = " . $warrior_id . ";";
-	writeLog("liveWarriors(): SQL: " . $sql);
-	$results = doSearch($sql);
-	
-	writeLog("getVictories(): Victories: " . $results[0]['count(*)']);
-	
-	return $results[0]['count(*)'];
+	displayWarriors($results);
 	
 }
 
 function displayWarriors($arrWarriors) {
+	
+	#HEAD:Builds a table of current warriors, their traits and stats, from provided array
 	
 	writeLog("displayWarriors()");
 	
@@ -70,21 +36,25 @@ function displayWarriors($arrWarriors) {
 	
 	foreach ($arrWarriors as $warrior) {
 		
-		$warrior_details = getAllWarriorDetails($warrior[1]);
+		$warrior_details = getAllWarriorDetails($warrior['warrior_id']);
 		
-		$text = $text . "<tr><td><a href='warrior.php?warrior=" . $warrior_details['warrior_id'] . "'>The " . $warrior_details['warrior_rank'] . " " . $warrior_details['warrior_name'] . "</a>";
-		$text = $text . "<td>" . warriorTraits($warrior_details['warrior_id']);
-		$text = $text . "<td>" . generateGraph($warrior[0], 5, 'left');
-		$text = $text . "<td>" . generateGraph($warrior_details['warrior_spd'], 5, 'left');
-		$text = $text . "<td>" . generateGraph($warrior_details['warrior_acc'], 5, 'left');
-		$text = $text . "<td>" . generateGraph($warrior_details['warrior_dex'], 5, 'left');
-		$text = $text . "<td>" . generateGraph($warrior_details['warrior_str'], 5, 'left');
-		$text = $text . "<td>" . generateGraph($warrior_details['warrior_con'], 5, 'left');
+		if ($warrior_details <> 0) {
+			
+			$text = $text . "<tr><td><a href='warrior.php?warrior=" . $warrior_details['warrior_id'] . "'>The " . $warrior_details['warrior_rank'] . " " . $warrior_details['warrior_name'] . "</a>";
+			$text = $text . "<td>" . warriorTraits($warrior_details['warrior_id']);
+			$text = $text . "<td>" . generateGraph($warrior_details['warrior_victories'], 5, 'left');
+			$text = $text . "<td>" . generateGraph($warrior_details['warrior_spd'], 5, 'left');
+			$text = $text . "<td>" . generateGraph($warrior_details['warrior_acc'], 5, 'left');
+			$text = $text . "<td>" . generateGraph($warrior_details['warrior_dex'], 5, 'left');
+			$text = $text . "<td>" . generateGraph($warrior_details['warrior_str'], 5, 'left');
+			$text = $text . "<td>" . generateGraph($warrior_details['warrior_con'], 5, 'left');
+			
+			$total = $warrior_details['warrior_spd'] + $warrior_details['warrior_acc'] + $warrior_details['warrior_dex'] + $warrior_details['warrior_str'] + $warrior_details['warrior_con'];
+			$text = $text . "<td>" . generateGraph($total, 2, 'left');
+			
+			$text = $text . "</tr>\n";
 		
-		$total = $warrior_details['warrior_spd'] + $warrior_details['warrior_acc'] + $warrior_details['warrior_dex'] + $warrior_details['warrior_str'] + $warrior_details['warrior_con'];
-		$text = $text . "<td>" . generateGraph($total, 2, 'left');
-		
-		$text = $text . "</tr>\n";
+		}
 		
 	}
 	
@@ -96,6 +66,8 @@ function displayWarriors($arrWarriors) {
 
 function generateGraph($value, $multiplier, $legend) {
 	
+	#HEAD:Generates a simple bar graph for the provided parameters
+	
 	writeLog("generateGraph()");
 	
 	$width = $value * $multiplier;
@@ -104,13 +76,14 @@ function generateGraph($value, $multiplier, $legend) {
 	} elseif ($legend == "right") {
 		$text = "<table cellpadding=0 cellspacing=2 border=0><tr><td width=" . $width . "px bgcolor=red><td width=20px align=center>" . $value . "</tr></table>";
 	}
-
 	
 	return $text;
 	
 }
 
 function mostRecentFights($number) {
+	
+	#HEAD:Generates a table of the most recent fights
 	
 	writeLog("mostRecentFights()");
 	
@@ -123,9 +96,22 @@ function mostRecentFights($number) {
 	foreach ($results as $fight) {
 		
 		$winner_name = getWarriorAttribute($fight['fight_winner'], "warrior_name");
-		$loser_name = getWarriorAttribute($fight['fight_loser'], "warrior_name");
+		if ($winner_name == "") { 
+			$winner_name = "A nameless warrior"; 
+		} else {
+			$winner_name = "<a href='warrior.php?warrior=" . $fight['fight_winner'] . "'>" . $winner_name . "</a>";
+		}
 
-		$text = $text . "<tr><td><a href='fight.php?fight=" . $fight['fight_id'] . "'>" . $fight['fight_id'] . "</a><td><a href='warrior.php?warrior=" . $fight['fight_winner'] . "'>" . $winner_name . "</a> defeated <a href='warrior.php?warrior=" . $fight['fight_loser'] . "'>" . $loser_name . "</a> in " . $fight['fight_rounds'] . " rounds.</tr>";
+
+		
+		$loser_name = getWarriorAttribute($fight['fight_loser'], "warrior_name");
+		if ($loser_name == "") { 
+			$loser_name = "a nameless warrior"; 
+		} else {
+			$loser_name = "<a href='warrior.php?warrior=" . $fight['fight_loser'] . "'>" . $loser_name . "</a>";
+		}
+
+		$text = $text . "<tr><td><a href='fight.php?fight=" . $fight['fight_id'] . "'>" . $fight['fight_id'] . "</a><td>" . $winner_name . " defeated " . $loser_name . " in " . $fight['fight_rounds'] . " rounds.</tr>";
 		
 	}
 	
@@ -137,22 +123,30 @@ function mostRecentFights($number) {
 
 function displayWarriorStats($warrior_id) {
 	
+	#HEAD:Displays the stats for the provided warrior
+	
 	writeLog("displayWarriorStats()");
 	
 	$details = getAllWarriorDetails($warrior_id);
 	
-	echo "<table cellpadding=3 cellspacing=1 border=1 align=center width=500px>\n";
-	echo "<tr bgcolor=#ddd><td colspan=2 align=center><h1>The " . $details['warrior_rank'] . " " . $details['warrior_name'] . "</h1><h3>" . warriorTraits($warrior_id) . "</h3></tr>";
-	echo "<tr><td width=200px align=right>SPD<td>" . generateGraph($details['warrior_spd'], 5, 'left') . "</tr>";
-	echo "<tr><td width=200px align=right>ACC<td>" . generateGraph($details['warrior_acc'], 5, 'left') . "</tr>";
-	echo "<tr><td width=200px align=right>STR<td>" . generateGraph($details['warrior_str'], 5, 'left') . "</tr>";
-	echo "<tr><td width=200px align=right>DEX<td>" . generateGraph($details['warrior_dex'], 5, 'left') . "</tr>";
-	echo "<tr><td width=200px align=right>CON<td>" . generateGraph($details['warrior_con'], 5, 'left') . "</tr>";
-	echo "</table>";
+	$text = "";
+	
+	$text = $text . "<table cellpadding=3 cellspacing=1 border=1 align=center width=500px>\n";
+	$text = $text . "<tr bgcolor=#ddd><td colspan=2 align=center><h1>The " . $details['warrior_rank'] . " " . $details['warrior_name'] . "</h1><h3>" . warriorTraits($warrior_id) . "</h3></tr>";
+	$text = $text . "<tr><td width=200px align=right>SPD<td>" . generateGraph($details['warrior_spd'], 5, 'left') . "</tr>";
+	$text = $text . "<tr><td width=200px align=right>ACC<td>" . generateGraph($details['warrior_acc'], 5, 'left') . "</tr>";
+	$text = $text . "<tr><td width=200px align=right>STR<td>" . generateGraph($details['warrior_str'], 5, 'left') . "</tr>";
+	$text = $text . "<tr><td width=200px align=right>DEX<td>" . generateGraph($details['warrior_dex'], 5, 'left') . "</tr>";
+	$text = $text . "<tr><td width=200px align=right>CON<td>" . generateGraph($details['warrior_con'], 5, 'left') . "</tr>";
+	$text = $text . "</table>";
+	
+	return $text;
 	
 }
 
 function allWarriorFights($warrior_id) {
+	
+	#HEAD:Generates a list of all fights in which the provided warrior has fought
 	
 	writeLog("allWarriorFights()");
 	
@@ -174,7 +168,15 @@ function allWarriorFights($warrior_id) {
 
 	foreach ($results as $fight) {
 		
-		echo "<tr><td align=center><a href='fight.php?fight=" . $fight['fight_id'] . "'>WIN</a><td>Defeated <a href='warrior.php?warrior=" . $fight['fight_loser'] . "'>The " . getWarriorAttribute($fight['fight_loser'], 'warrior_rank') . " " . getWarriorAttribute($fight['fight_loser'], 'warrior_name') . "</a> in " . $fight['fight_rounds'] . " rounds.</tr>";
+		echo "<tr><td align=center><a href='fight.php?fight=" . $fight['fight_id'] . "'>WIN</a>";
+		
+		$loser_name = getWarriorAttribute($fight['fight_loser'], 'warrior_name');
+		$loser_rank = getWarriorAttribute($fight['fight_loser'], 'warrior_rank');
+		if ($loser_name != "" && $loser_rank != "") {
+			echo "<td>Defeated <a href='warrior.php?warrior=" . $fight['fight_loser'] . "'>The " . $loser_rank . " " . $loser_name . "</a> in " . $fight['fight_rounds'] . " rounds.</tr>";
+		} else {
+			echo "<td>Defeated a nameless warrior in " . $fight['fight_rounds'] . " rounds.</tr>";
+		}
 		
 	}
 	
@@ -183,6 +185,8 @@ function allWarriorFights($warrior_id) {
 }
 
 function displayFights() {
+	
+	#HEAD:Displays a list of the most recent fights.
 	
 	writeLog("displayFights()");
 	
@@ -195,9 +199,24 @@ function displayFights() {
 	$results = doSearch($sql);
 	foreach ($results as $fight) {
 		echo "<tr><td align=center><a href='fight.php?fight=" . $fight['fight_id'] . "'>" . $fight['fight_id'] . "</a>";
-		echo "<td align=right><a href='warrior.php?warrior=" . $fight['fight_winner'] . "'>The " . getWarriorAttribute($fight['fight_winner'], 'warrior_rank') . " " . getWarriorAttribute($fight['fight_winner'], 'warrior_name') . "</a>";
+		$winner_rank = getWarriorAttribute($fight['fight_winner'], 'warrior_rank');
+		$winner_name = getWarriorAttribute($fight['fight_winner'], 'warrior_name');
+		writeLog("displayFights(): Winner: The " . $winner_rank . " " . $winner_name);
+		if ($winner_rank != "" && $winner_name != "") {
+			echo "<td align=right><a href='warrior.php?warrior=" . $fight['fight_winner'] . "'>The " . $winner_rank . " " . $winner_name . "</a>";
+		} else {
+			echo "<td align=right>Some nameless warrior";
+		}
+		
 		echo "<td align=center>defeated";
-		echo "<td><a href='warrior.php?warrior=" . $fight['fight_loser'] . "'>The " . getWarriorAttribute($fight['fight_loser'], 'warrior_rank') . " " . getWarriorAttribute($fight['fight_loser'], 'warrior_name') . "</a>";
+		$loser_rank = getWarriorAttribute($fight['fight_loser'], 'warrior_rank');
+		$loser_name = getWarriorAttribute($fight['fight_loser'], 'warrior_name');
+		writeLog("displayFights(): Winner: The " . $loser_rank . " " . $loser_name);
+		if ($loser_rank != "" && $loser_name != "") {
+			echo "<td><a href='warrior.php?warrior=" . $fight['fight_loser'] . "'>The " .$loser_rank . " " . $loser_name . "</a>";
+		} else {
+			echo "<td align=left>Some nameless warrior";
+		}
 		echo "<td align=center>" . $fight['fight_rounds'];
 		echo "</tr>";	
 	}
@@ -207,6 +226,8 @@ function displayFights() {
 }
 
 function displayFight($fight_id) {
+	
+	#HEAD:Extracts and displays the stored fight log for the provided fight.
 	
 	writeLog("displayFights()");
 	
@@ -220,6 +241,8 @@ function displayFight($fight_id) {
 }
 
 function warriorTraits($warrior_id) {
+	
+	#HEAD:Generates a list of the traits for the provided warrior
 	
 	writeLog("warriorTraits(): Warrior ID: " . $warrior_id);
 	
@@ -244,6 +267,44 @@ function warriorTraits($warrior_id) {
 	
 	return trim($traits);
 
+}
+
+function displayWarriorFamily($warrior_id) {
+	
+	#HEAD:Displays the provided warrior's father and sons
+	
+	writeLog("displayWarriorFamily(): Warrior ID: " . $warrior_id);
+	
+	$text = "<table cellpadding=3 cellspacing=1 border=1 align=center width=500px>";
+	
+	# Get Parent
+	$parent_id = getWarriorAttribute($warrior_id, 'warrior_parent');
+	$parent_name = getWarriorAttribute($parent_id, 'warrior_name');
+	$parent_rank = getWarriorAttribute($parent_id, 'warrior_rank');
+	$text = $text . "<tr><td width=50px>Father<td><a href='warrior.php?warrior=" . $parent_id . "'>The " . $parent_rank . " " . $parent_name . "</a></tr>";
+	
+	# Get Warrior Name
+	$warrior_name = getWarriorAttribute($warrior_id, 'warrior_name');
+	$warrior_rank = getWarriorAttribute($warrior_id, 'warrior_rank');
+	$text = $text . "<tr><td colspan=2><strong>The " . $warrior_rank . " " . $warrior_name . "</strong></tr>";
+	
+	# Get Children
+	$sql = "SELECT warrior_id FROM roguewarrior.warrior WHERE warrior_parent = " . $warrior_id . ";";
+	writeLog("displayWarriorFamily(): SQL: " . $sql);
+	$results = doSearch($sql);
+		
+	foreach ($results as $child) {
+		
+		$child_name = getWarriorAttribute($child['warrior_id'], 'warrior_name');
+		$child_rank = getWarriorAttribute($child['warrior_id'], 'warrior_rank');
+		$text = $text . "<tr><td>Son<td><a href='warrior.php?warrior=" . $child['warrior_id'] . "'>The " . $child_rank . " " . $child_name . "</a></tr>";
+		
+	}
+	
+	$text = $text . "</table>";
+	
+	return $text;
+	
 }
 
 ?>

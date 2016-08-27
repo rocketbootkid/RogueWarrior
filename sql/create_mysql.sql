@@ -13,6 +13,7 @@ CREATE TABLE `roguewarrior`.`warrior` (
   `warrior_con` INT NULL,
   `warrior_status` VARCHAR(45) NULL,
   `warrior_parent` INT NULL,
+  `warrior_victories` INT NULL,
   PRIMARY KEY (`warrior_id`));
   
   CREATE TABLE `roguewarrior`.`results` (
@@ -22,3 +23,5 @@ CREATE TABLE `roguewarrior`.`warrior` (
   `fight_rounds` INT NULL,
   `fight_log` MEDIUMTEXT NULL,
   PRIMARY KEY (`fight_id`));
+
+  CREATE INDEX `idx_warrior_warrior_id`  ON `roguewarrior`.`warrior` (warrior_id) COMMENT '' ALGORITHM DEFAULT LOCK DEFAULT
