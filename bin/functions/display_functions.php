@@ -32,15 +32,17 @@ function displayWarriors($arrWarriors) {
 	
 	writeLog("displayWarriors()");
 	
-	$text = "<table cellpadding=3 cellspacing=1 border=1>\n<tr bgcolor=#ddd><td>Name<td>Traits<td align=center>Victories<td align=center>SPD<td align=center>ACC<td align=center>DEX<td align=center>STR<td align=center>CON<td align=center>Total</tr>\n";
+	$text = "<table cellpadding=3 cellspacing=1 border=1>\n<tr bgcolor=#ddd><td>Rank<td>Name<td>Traits<td align=center>Victories<td align=center>SPD<td align=center>ACC<td align=center>DEX<td align=center>STR<td align=center>CON<td align=center>Total</tr>\n";
 	
 	foreach ($arrWarriors as $warrior) {
 		
 		$warrior_details = getAllWarriorDetails($warrior['warrior_id']);
 		
 		if ($warrior_details <> 0) {
-			
-			$text = $text . "<tr><td><a href='warrior.php?warrior=" . $warrior_details['warrior_id'] . "'>The " . $warrior_details['warrior_rank'] . " " . $warrior_details['warrior_name'] . "</a>";
+				
+			$text = $text . "<tr>";
+			$text = $text . "<td>" . $warrior_details['warrior_rank'];
+			$text = $text . "<td><a href='warrior.php?warrior=" . $warrior_details['warrior_id'] . "'>" . $warrior_details['warrior_name'] . "</a>";
 			$text = $text . "<td>" . warriorTraits($warrior_details['warrior_id']);
 			$text = $text . "<td>" . generateGraph($warrior_details['warrior_victories'], 5, 'left');
 			$text = $text . "<td>" . generateGraph($warrior_details['warrior_spd'], 5, 'left');

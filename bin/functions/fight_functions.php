@@ -38,7 +38,14 @@ function doFight($warriors, $mode) {
 	}
 	
 	$round = 0;
-	$fight_log = "<table cellpadding=3 cellspacing=3 border=1><tr bgcolor=#ddd><td>Round<td>Attacker - " . $arrAttacker['warrior_name'] . "<td>Defender - " . $arrDefender['warrior_name'] . "</tr>";
+	$fight_log = "<table cellpadding=3 cellspacing=3 border=1>";
+	
+	$fight_log = $fight_log . "<tr bgcolor=#ddd><td>Round<td>Attacker<td>Defender</tr>";
+		
+	$fight_log = $fight_log . "<tr bgcolor=#ddd><td>";
+	$fight_log = $fight_log . "<td align=center><h3><a href=warrior.php?warrior=" . $arrAttacker['warrior_id'] . ">The " . $arrAttacker['warrior_rank'] . " " . $arrAttacker['warrior_name'] . "</a></h3>";
+	$fight_log = $fight_log . "<td align=center><h3><a href=warrior.php?warrior=" . $arrDefender['warrior_id'] . ">The " . $arrDefender['warrior_rank'] . " " . $arrDefender['warrior_name'] . "</a></h3>";
+	$fight_log = $fight_log . "</tr>";
 	
 	while ($arrAttacker['warrior_hp'] > 0 && $arrDefender['warrior_hp'] > 0) {
 
@@ -105,11 +112,11 @@ function doFight($warriors, $mode) {
 	if ($arrAttacker['warrior_hp'] > 0 && $arrDefender['warrior_hp'] <= 0) { # Attacker wins
 		$winner = $arrAttacker['warrior_id'];
 		$loser = $arrDefender['warrior_id'];
-		$fight_log = $fight_log . "<tr bgcolor=#ddd><td colspan=3 align=center>After " . $round . " rounds, " . $arrAttacker['warrior_name'] . " is the victor!</tr>";
+		$fight_log = $fight_log . "<tr bgcolor=#ddd><td colspan=3 align=center>After " . $round . " rounds, <a href=warrior.php?warrior=" . $arrAttacker['warrior_id'] . ">The " . $arrAttacker['warrior_rank'] . " " . $arrAttacker['warrior_name'] . "</a> is the victor!</tr>";
 	} elseif ($arrDefender['warrior_hp'] > 0 && $arrAttacker['warrior_hp'] <= 0) { # Defender wins
 		$winner = $arrDefender['warrior_id'];
 		$loser = $arrAttacker['warrior_id'];
-		$fight_log = $fight_log . "<tr bgcolor=#ddd><td colspan=3 align=center>After " . $round . " rounds, " . $arrDefender['warrior_name'] . " is the victor!</tr>";
+		$fight_log = $fight_log . "<tr bgcolor=#ddd><td colspan=3 align=center>After " . $round . " rounds, <a href=warrior.php?warrior=" . $arrDefender['warrior_id'] . ">The " . $arrDefender['warrior_rank'] . " " . $arrDefender['warrior_name'] . "</a> is the victor!</tr>";
 	} else {
 		writeLog("doFight(): Attacker HP: " . $arrAttacker['warrior_hp']);
 		writeLog("doFight(): Defender HP: " . $arrDefender['warrior_hp']);
@@ -303,7 +310,7 @@ function updateLoser($loser) {
 	$victories = getWarriorVictories($loser);
 	
 	# if less than 5 delete them
-	if ($victories <= 5) {
+	if ($victories < 5) {
 		$dml = "DELETE FROM roguewarrior.warrior WHERE warrior_id = " . $loser . ";";
 		writeLog("updateLoser(): DML: " . $dml);												
 		$status = doInsert($dml);	
