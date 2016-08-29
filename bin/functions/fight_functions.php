@@ -192,7 +192,12 @@ function chooseSuitableWarrior($warrior_one_id) {
 	$arrRanks = buildRankArray();
 
 	# Convert to Rank Number
-	$warrior_one_rank_number = array_search($warrior_one_rank,array_keys($arrRanks));
+	$warrior_one_rank_number = 0;
+	for ($r = 0; $r < count($arrRanks); $r++) {
+		if ($arrRanks[$r][0] == $warrior_one_rank) {
+			$warrior_one_rank_number = $r;
+		}
+	}
 	writeLog("chooseSuitableWarrior(): Warrior 1 Rank Number: " . $warrior_one_rank_number);
 
 	# Determine adjacent Rank Numbers, and if less than zero, set to zero
@@ -217,9 +222,17 @@ function chooseSuitableWarrior($warrior_one_id) {
 	writeLog("chooseSuitableWarrior(): Possible Foes: " . count($results));
 	$rows = count($results) - 1;
 	
+	if (count($results) != 0) {
 	
-	$warrior_two = $results[rand(0,$rows)]['warrior_id'];
-	writeLog("chooseSuitableWarrior(): Warrior 2: " . $warrior_two);
+		$warrior_two = $results[rand(0,$rows)]['warrior_id'];
+		writeLog("chooseSuitableWarrior(): Warrior 2: " . $warrior_two);
+		
+		$warrior_two_rank = getWarriorAttribute($warrior_two, 'warrior_rank');
+		writeLog("chooseSuitableWarrior(): Warrior 1 Rank: " . $warrior_one_rank);
+		writeLog("chooseSuitableWarrior(): Warrior 2 Rank: " . $warrior_two_rank);
+	} else {
+		$warrior_two = 0;
+	}
 	
 	return $warrior_two;
 
@@ -309,19 +322,10 @@ function updateLoser($loser) {
 	# Determine how many victories for the loser
 	$victories = getWarriorVictories($loser);
 	
-	# if less than 5 delete them
-	if ($victories < 5) {
-		$dml = "DELETE FROM roguewarrior.warrior WHERE warrior_id = " . $loser . ";";
-		writeLog("updateLoser(): DML: " . $dml);												
-		$status = doInsert($dml);	
+	$dml = "UPDATE roguewarrior.warrior SET warrior_status = 'Dead' WHERE warrior_id = " . $loser . ";";
+	writeLog("updateLoser(): DML: " . $dml);												
+	$status = doInsert($dml);
 		
-	} else { # otherwise just make them dead
-		$dml = "UPDATE roguewarrior.warrior SET warrior_status = 'Dead' WHERE warrior_id = " . $loser . ";";
-		writeLog("updateLoser(): DML: " . $dml);												
-		$status = doInsert($dml);
-		
-	}
-	
 }
 
 function getWarriorVictories($warrior_id) {
