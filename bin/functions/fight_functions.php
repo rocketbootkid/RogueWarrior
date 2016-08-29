@@ -38,20 +38,19 @@ function doFight($warriors, $mode) {
 	}
 	
 	$round = 0;
-	$fight_log = "<table cellpadding=3 cellspacing=3 border=1>";
+	$fight_log = "<table cellpadding=3 cellspacing=1 border=1>";
 	
-	$fight_log = $fight_log . "<tr bgcolor=#ddd><td>Round<td>Attacker<td>Defender</tr>";
+	$fight_log = $fight_log . "<tr bgcolor=#ddd><td>Round<td align=center colspan=2>Attacker<td align=center colspan=2>Defender</tr>";
 		
 	$fight_log = $fight_log . "<tr bgcolor=#ddd><td>";
-	$fight_log = $fight_log . "<td align=center><h3><a href=warrior.php?warrior=" . $arrAttacker['warrior_id'] . ">The " . $arrAttacker['warrior_rank'] . " " . $arrAttacker['warrior_name'] . "</a></h3>";
-	$fight_log = $fight_log . "<td align=center><h3><a href=warrior.php?warrior=" . $arrDefender['warrior_id'] . ">The " . $arrDefender['warrior_rank'] . " " . $arrDefender['warrior_name'] . "</a></h3>";
+	$fight_log = $fight_log . "<td align=center colspan=2><h3><a href=warrior.php?warrior=" . $arrAttacker['warrior_id'] . ">The " . $arrAttacker['warrior_rank'] . " " . $arrAttacker['warrior_name'] . "</a></h3>";
+	$fight_log = $fight_log . "<td align=center colspan=2><h3><a href=warrior.php?warrior=" . $arrDefender['warrior_id'] . ">The " . $arrDefender['warrior_rank'] . " " . $arrDefender['warrior_name'] . "</a></h3>";
 	$fight_log = $fight_log . "</tr>";
 	
 	while ($arrAttacker['warrior_hp'] > 0 && $arrDefender['warrior_hp'] > 0) {
 
 		$round++;
 		writeLog("doFight(): Round " . $round . "!");
-		$fight_log = $fight_log . "<tr><td align=center>" . $round;
 
 		# First attacks / Second Defends
 		
@@ -66,12 +65,14 @@ function doFight($warriors, $mode) {
 			# Take damage away from Defender HP
 			$arrDefender['warrior_hp'] = $arrDefender['warrior_hp'] - $damage;
 			
-			$fight_log = $fight_log . "<td>" . $arrAttacker['warrior_name'] . " hits " . $arrDefender['warrior_name'] . " for " . $damage . " points of damage!</br>" . $arrDefender['warrior_name'] . " has " . $arrDefender['warrior_hp'] . "HP remaining.";
+			$attacker_details = "<td>Hits for " . $damage . " points of damage!";
+			$defender_hp = "<td align=right>" . generateGraph($arrDefender['warrior_hp'], 3, 'right');
 					
 		} else { # Miss
 			writeLog("doFight(): " . $arrAttacker['warrior_name'] . " misses!");
 			
-			$fight_log = $fight_log . "<td>" . $arrAttacker['warrior_name'] . " misses " . $arrDefender['warrior_name'] . "!</br>" . $arrDefender['warrior_name'] . " has " . $arrDefender['warrior_hp'] . "HP remaining.";
+			$attacker_details = "<td>Misses!";
+			$defender_hp = "<td align=right>" . generateGraph($arrDefender['warrior_hp'], 3, 'right');
 			
 		}
 		
@@ -90,12 +91,14 @@ function doFight($warriors, $mode) {
 				# Take damage away from Defender
 				$arrAttacker['warrior_hp'] = $arrAttacker['warrior_hp'] - $damage;
 				
-				$fight_log = $fight_log . "<td>" . $arrDefender['warrior_name'] . " hits " . $arrAttacker['warrior_name'] . " for " . $damage . " points of damage!</br>" . $arrAttacker['warrior_name'] . " has " . $arrAttacker['warrior_hp'] . "HP remaining.</tr>";
-				
+				$defender_details = "<td>Hits for " . $damage . " points of damage!";
+				$attacker_hp = "<td>" . generateGraph($arrAttacker['warrior_hp'], 3, 'left');
+								
 			} else {
 				writeLog("doFight(): " . $arrDefender['warrior_name'] . " misses!");
 				
-				$fight_log = $fight_log . "<td>" . $arrDefender['warrior_name'] . " misses " . $arrAttacker['warrior_name'] . "!</br>" . $arrAttacker['warrior_name'] . " has " . $arrAttacker['warrior_hp'] . "HP remaining.</tr>";
+				$defender_details = "<td>Misses!";
+				$attacker_hp = "<td>" . generateGraph($arrAttacker['warrior_hp'], 3, 'left');
 				
 			}
 		
@@ -106,17 +109,19 @@ function doFight($warriors, $mode) {
 			
 		}
 		
+		$fight_log = $fight_log . "<tr><td align=center>" . $round . $attacker_details . $attacker_hp . $defender_hp . $defender_details . "</tr>";
+		
 	}
 	
 	# Declare the winner
 	if ($arrAttacker['warrior_hp'] > 0 && $arrDefender['warrior_hp'] <= 0) { # Attacker wins
 		$winner = $arrAttacker['warrior_id'];
 		$loser = $arrDefender['warrior_id'];
-		$fight_log = $fight_log . "<tr bgcolor=#ddd><td colspan=3 align=center>After " . $round . " rounds, <a href=warrior.php?warrior=" . $arrAttacker['warrior_id'] . ">The " . $arrAttacker['warrior_rank'] . " " . $arrAttacker['warrior_name'] . "</a> is the victor!</tr>";
+		$fight_log = $fight_log . "<tr bgcolor=#ddd><td colspan=5 align=center>After " . $round . " rounds, <a href=warrior.php?warrior=" . $arrAttacker['warrior_id'] . ">The " . $arrAttacker['warrior_rank'] . " " . $arrAttacker['warrior_name'] . "</a> is the victor!</tr>";
 	} elseif ($arrDefender['warrior_hp'] > 0 && $arrAttacker['warrior_hp'] <= 0) { # Defender wins
 		$winner = $arrDefender['warrior_id'];
 		$loser = $arrAttacker['warrior_id'];
-		$fight_log = $fight_log . "<tr bgcolor=#ddd><td colspan=3 align=center>After " . $round . " rounds, <a href=warrior.php?warrior=" . $arrDefender['warrior_id'] . ">The " . $arrDefender['warrior_rank'] . " " . $arrDefender['warrior_name'] . "</a> is the victor!</tr>";
+		$fight_log = $fight_log . "<tr bgcolor=#ddd><td colspan=5 align=center>After " . $round . " rounds, <a href=warrior.php?warrior=" . $arrDefender['warrior_id'] . ">The " . $arrDefender['warrior_rank'] . " " . $arrDefender['warrior_name'] . "</a> is the victor!</tr>";
 	} else {
 		writeLog("doFight(): Attacker HP: " . $arrAttacker['warrior_hp']);
 		writeLog("doFight(): Defender HP: " . $arrDefender['warrior_hp']);

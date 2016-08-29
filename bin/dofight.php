@@ -7,6 +7,7 @@
 	include('functions/log_functions.php');
 	include('functions/mysql_functions.php');
 	include('functions/fight_functions.php');
+	include('functions/display_functions.php');
 
 	# If there aren't enough warriors, create some new ones
 	if (countWarriors() < 30) {

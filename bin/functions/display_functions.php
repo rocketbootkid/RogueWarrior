@@ -44,15 +44,15 @@ function displayWarriors($arrWarriors) {
 			$text = $text . "<td>" . $warrior_details['warrior_rank'];
 			$text = $text . "<td><a href='warrior.php?warrior=" . $warrior_details['warrior_id'] . "'>" . $warrior_details['warrior_name'] . "</a>";
 			$text = $text . "<td>" . warriorTraits($warrior_details['warrior_id']);
-			$text = $text . "<td>" . generateGraph($warrior_details['warrior_victories'], 5, 'left');
-			$text = $text . "<td>" . generateGraph($warrior_details['warrior_spd'], 5, 'left');
-			$text = $text . "<td>" . generateGraph($warrior_details['warrior_acc'], 5, 'left');
-			$text = $text . "<td>" . generateGraph($warrior_details['warrior_dex'], 5, 'left');
-			$text = $text . "<td>" . generateGraph($warrior_details['warrior_str'], 5, 'left');
-			$text = $text . "<td>" . generateGraph($warrior_details['warrior_con'], 5, 'left');
+			$text = $text . "<td>" . generateGraph($warrior_details['warrior_victories'], 5, 'right');
+			$text = $text . "<td>" . generateGraph($warrior_details['warrior_spd'], 5, 'right');
+			$text = $text . "<td>" . generateGraph($warrior_details['warrior_acc'], 5, 'right');
+			$text = $text . "<td>" . generateGraph($warrior_details['warrior_dex'], 5, 'right');
+			$text = $text . "<td>" . generateGraph($warrior_details['warrior_str'], 5, 'right');
+			$text = $text . "<td>" . generateGraph($warrior_details['warrior_con'], 5, 'right');
 			
 			$total = $warrior_details['warrior_spd'] + $warrior_details['warrior_acc'] + $warrior_details['warrior_dex'] + $warrior_details['warrior_str'] + $warrior_details['warrior_con'];
-			$text = $text . "<td>" . generateGraph($total, 2, 'left');
+			$text = $text . "<td>" . generateGraph($total, 2, 'right');
 			
 			$text = $text . "</tr>\n";
 		
@@ -73,10 +73,10 @@ function generateGraph($value, $multiplier, $legend) {
 	writeLog("generateGraph()");
 	
 	$width = $value * $multiplier;
-	if ($legend == "left") {
-		$text = "<table cellpadding=0 cellspacing=2 border=0><tr><td width=20px align=center>" . $value . "<td width=" . $width . "px bgcolor=red></tr></table>";		
-	} elseif ($legend == "right") {
-		$text = "<table cellpadding=0 cellspacing=2 border=0><tr><td width=" . $width . "px bgcolor=red><td width=20px align=center>" . $value . "</tr></table>";
+	if ($legend == 'left') {
+		$text = "<table cellpadding=0 cellspacing=2 border=0 width=100%><tr><td align=right>" . $value . "<td width=" . $width . "px bgcolor=red></tr></table>";		
+	} elseif ($legend == 'right') {
+		$text = "<table cellpadding=0 cellspacing=2 border=0 width=100%><tr><td width=" . $width . "px bgcolor=red><td align=left>" . $value . "</tr></table>";
 	}
 	
 	return $text;
